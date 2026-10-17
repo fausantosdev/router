@@ -36,7 +36,7 @@ $router->group("admin", \Http\Group::class);
 
 $router->get("/", "Coffee:admin");
 $router->get("/user/{id}", "Coffee:admin");
-$router->get("/user/{id}/profile", "Coffee:admin", \Http\Guest::class);
+$router->get("/user/{id}/profile", "Coffee:admin", middleware: \Http\Guest::class);
 $router->get("/user/{id}/profile/{photo}", "Coffee:admin");
 
 /**
