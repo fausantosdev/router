@@ -1,6 +1,6 @@
 {
-  "name": "coffeecode/router",
-  "description": "A classic CoffeeCode Router is easy, fast and extremely uncomplicated. Create and manage your routes in minutes!",
+  "name": "fausantosdev/router",
+  "description": "Lightweight routing for PHP 8.5; independent continuation of CoffeeCode Router.",
   "keywords": [
     "CoffeeCode",
     "UpInside",
@@ -8,7 +8,7 @@
     "Route",
     "Routes"
   ],
-  "homepage": "http://www.upinside.com.br",
+  "homepage": "https://github.com/fausantosdev/router",
   "license": "MIT",
   "authors": [
     {
@@ -18,11 +18,41 @@
     }
   ],
   "require": {
-    "php": ">=8.0"
+    "php": "~8.5.0",
+    "ext-filter": "*",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": {
       "CoffeeCode\\Router\\": "src"
     }
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^13.0",
+    "phpstan/phpstan": "^2.1",
+    "squizlabs/php_codesniffer": "^4.0"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CoffeeCode\\Router\\Tests\\": "tests/"
+    },
+    "classmap": [
+      "tests/Support/"
+    ],
+    "files": [
+      "tests/Support/functions.php"
+    ]
+  },
+  "scripts": {
+    "test": "@php vendor/bin/phpunit",
+    "analyse": "@php vendor/bin/phpstan analyse --memory-limit=512M",
+    "lint": "@php tools/lint.php",
+    "style": "@php vendor/bin/phpcs --standard=PSR12 src tests tools examples",
+    "check": [
+      "@lint",
+      "@test",
+      "@analyse",
+      "@style"
+    ]
   }
 }

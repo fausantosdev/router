@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoffeeCode\Router;
 
 /**
@@ -16,22 +18,22 @@ class Router extends Dispatch
      * @param string $projectUrl
      * @param null|string $separator
      */
-    public function __construct(string $projectUrl, ?string $separator = ":")
+    public function __construct(string $projectUrl, ?string $separator = ":", ?Request $request = null)
     {
-        parent::__construct($projectUrl, $separator);
+        parent::__construct($projectUrl, $separator, $request);
     }
 
     /**
      * @param string $route
      * @param callable|string $handler
      * @param string|null $name
-     * @param array|string|null $middleware
+     * @param array<string>|string|null $middleware
      */
     public function get(
         string $route,
         callable|string $handler,
-        string $name = null,
-        array|string $middleware = null
+        ?string $name = null,
+        array|string|null $middleware = null
     ): void {
         $this->addRoute("GET", $route, $handler, $name, $middleware);
     }
@@ -40,13 +42,13 @@ class Router extends Dispatch
      * @param string $route
      * @param callable|string $handler
      * @param string|null $name
-     * @param array|string|null $middleware
+     * @param array<string>|string|null $middleware
      */
     public function post(
         string $route,
         callable|string $handler,
-        string $name = null,
-        array|string $middleware = null
+        ?string $name = null,
+        array|string|null $middleware = null
     ): void {
         $this->addRoute("POST", $route, $handler, $name, $middleware);
     }
@@ -55,13 +57,13 @@ class Router extends Dispatch
      * @param string $route
      * @param callable|string $handler
      * @param string|null $name
-     * @param array|string|null $middleware
+     * @param array<string>|string|null $middleware
      */
     public function put(
         string $route,
         callable|string $handler,
-        string $name = null,
-        array|string $middleware = null
+        ?string $name = null,
+        array|string|null $middleware = null
     ): void {
         $this->addRoute("PUT", $route, $handler, $name, $middleware);
     }
@@ -70,13 +72,13 @@ class Router extends Dispatch
      * @param string $route
      * @param callable|string $handler
      * @param string|null $name
-     * @param array|string|null $middleware
+     * @param array<string>|string|null $middleware
      */
     public function patch(
         string $route,
         callable|string $handler,
-        string $name = null,
-        array|string $middleware = null
+        ?string $name = null,
+        array|string|null $middleware = null
     ): void {
         $this->addRoute("PATCH", $route, $handler, $name, $middleware);
     }
@@ -85,14 +87,33 @@ class Router extends Dispatch
      * @param string $route
      * @param callable|string $handler
      * @param string|null $name
-     * @param array|string|null $middleware
+     * @param array<string>|string|null $middleware
      */
     public function delete(
         string $route,
         callable|string $handler,
-        string $name = null,
-        array|string $middleware = null
+        ?string $name = null,
+        array|string|null $middleware = null
     ): void {
         $this->addRoute("DELETE", $route, $handler, $name, $middleware);
+    }
+    /** @param array<string>|string|null $middleware */
+    public function head(
+        string $route,
+        callable|string $handler,
+        ?string $name = null,
+        array|string|null $middleware = null,
+    ): void {
+        $this->addRoute("HEAD", $route, $handler, $name, $middleware);
+    }
+
+    /** @param array<string>|string|null $middleware */
+    public function options(
+        string $route,
+        callable|string $handler,
+        ?string $name = null,
+        array|string|null $middleware = null,
+    ): void {
+        $this->addRoute("OPTIONS", $route, $handler, $name, $middleware);
     }
 }
