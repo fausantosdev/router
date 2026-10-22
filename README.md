@@ -96,7 +96,25 @@ Controllers são instanciados com `$router`; a action recebe o array de dados. A
 
 Closures e outros callables recebem `($data, $router)`. Configurações inválidas lançam `ConfigurationException`; exceções da aplicação não são mascaradas como 404. Uma action ausente é erro de configuração, não método HTTP inválido.
 
-**Prioridade:** rotas inteiramente estáticas antes das dinâmicas; entre rotas dinâmicas concorrentes, vence a primeira cadastrada. Não há prioridade por quantidade de segmentos estáticos. Rotas iguais com o mesmo verbo e nomes repetidos são rejeitados, não sobrescritos. Placeholders aceitam `{id}` e nomes com letras, números, `_` ou `-`, iniciando por letra/`_`; nomes devem ser únicos na rota. Não há regex customizada, parâmetros opcionais ou catch-all nesta major proposta.
+**Prioridade:** rotas inteiramente estáticas antes das dinâmicas; entre rotas dinâmicas concorrentes, vence a primeira cadastrada. Não há prioridade por quantidade de segmentos estáticos. Rotas iguais com o mesmo verbo e nomes repetidos são rejeitados, não sobrescritos. Placeholders aceitam `{id}` (obrigatório) e `{id?}` (opcional), com nomes iniciando por letra/`_`, seguidos por letras, números, `_` ou `-`; nomes devem ser únicos na rota. Não há regex customizada ou catch-all.
+
+### Parâmetros opcionais
+
+Sintaxe inspirada no [Laravel](https://laravel.com/framework/docs/12.x/routing), sem mudar a API de cadastro:
+
+```php
+$router->get('/users/{id?}', function (array $data): void {
+    // /users/123 => ['id' => '123']; /users => ['id' => null]
+});
+$router->get('/users/{user}/posts/{post?}', $handler);
+$router->get('/archive/{year?}/{month?}', $handler);
+```
+
+Opcionais devem ocupar **segmentos completos, consecutivos no fim da rota**. `/archive` entrega ambos como `null`; `/archive/2026` entrega `year='2026', month=null`; `/archive/2026/10` preenche ambos. Não é permitido pular o primeiro opcional com uma barra vazia (`/archive//10`). `{user}` continua obrigatório: `/users/posts/20` não corresponde ao exemplo de posts.
+
+Um opcional no meio (`/{id?}/posts`), seguido de obrigatório (`/{id?}/{post}`), ou embutido em um segmento (`/file-{id?}`) lança `ConfigurationException`. O parser de obrigatórios embutidos, como `/files/{name}.{ext}`, permanece intacto. O formato do callback continua sendo o array da biblioteca; não é a assinatura posicional de callbacks do Laravel.
+
+Ausentes são sempre `null`, inclusive em `data()` e `current()->data`, e vencem valores de mesmo nome no body. `/users` estática vence `/users/{id?}` independentemente da ordem de cadastro. Entre `/users/{id}` e `/users/{id?}`, quando ambas correspondem, continua vencendo a primeira cadastrada — não há alteração na prioridade dinâmica existente.
 
 ## Dados e body
 
@@ -154,7 +172,7 @@ $url = $router->route('user.show', ['id' => 'a/b', 'q' => 'hello world']);
 // https://example.com/users/a%2Fb?q=hello%20world
 ```
 
-Nome inexistente retorna `null`. Parâmetros obrigatórios ausentes, não escalares, vazios ou `.`/`..` lançam `ConfigurationException`. Segmentos usam `rawurlencode`; extras viram query RFC3986. Não envie valores previamente codificados se não quiser dupla codificação.
+Nome inexistente retorna `null`. Parâmetros obrigatórios ausentes, não escalares, vazios ou `.`/`..` lançam `ConfigurationException`. Opcionais ausentes ou explicitamente `null` omitem o segmento: uma rota nomeada `/users/{id?}` com `[]` gera `/users`. Com vários opcionais, não é permitido fornecer um posterior sem os anteriores; isso lança `ConfigurationException`. Segmentos fornecidos usam `rawurlencode`; extras viram query RFC3986. Não envie valores previamente codificados se não quiser dupla codificação.
 
 ## Migração e manutenção
 

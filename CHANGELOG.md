@@ -12,6 +12,8 @@
 - Encoding de URL nomeada, validação de parâmetros e redirects.
 
 ### Adicionado
+- Parâmetros opcionais `{name?}` em segmentos finais consecutivos: ausentes entregues como `null`, URLs nomeadas sem segmentos omitidos e prioridade existente preservada.
+- Regressões unitárias/HTTP para obrigatórios, opcionais, múltiplos segmentos, conflitos e padrões inválidos.
 - Snapshot `Request` injetável e parser memoizado de JSON/formulário.
 - Limite de body 1 MiB, erros 400/413/415 e override POST de formulário restrito.
 - Métodos HEAD/OPTIONS, fallback HEAD e `allowedMethods()`.

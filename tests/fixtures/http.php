@@ -16,6 +16,7 @@ $echo = static function (array $data, Router $router): void {
     );
 };
 $router->get('/users/{id}', $echo);
+$router->get('/optional/{id?}/{tab?}', $echo);
 $router->post('/users/{id}', $echo);
 $router->put('/users/{id}', $echo);
 $router->patch('/users/{id}', $echo);

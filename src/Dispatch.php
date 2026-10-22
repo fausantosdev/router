@@ -71,7 +71,18 @@ abstract class Dispatch
         }
         $data ??= [];
         $url = $route->path;
+        $omittedOptional = false;
         foreach ($route->parameters as $parameter) {
+            $optional = in_array($parameter, $route->optionalParameters, true);
+            if ($optional && (!array_key_exists($parameter, $data) || $data[$parameter] === null)) {
+                $url = str_replace('/{' . $parameter . '?}', '', $url);
+                unset($data[$parameter]);
+                $omittedOptional = true;
+                continue;
+            }
+            if ($optional && $omittedOptional) {
+                throw new ConfigurationException('Optional URL parameters cannot skip an earlier segment.');
+            }
             if (!array_key_exists($parameter, $data) || !is_scalar($data[$parameter])) {
                 throw new ConfigurationException('Missing or non-scalar URL parameter: ' . $parameter);
             }
@@ -79,9 +90,11 @@ abstract class Dispatch
             if ($value === '' || $value === '.' || $value === '..') {
                 throw new ConfigurationException('URL parameter cannot be empty or a dot segment.');
             }
-            $url = str_replace('{' . $parameter . '}', rawurlencode($value), $url);
+            $placeholder = '{' . $parameter . ($optional ? '?' : '') . '}';
+            $url = str_replace($placeholder, rawurlencode($value), $url);
             unset($data[$parameter]);
         }
+        $url = $url !== '' ? $url : '/';
         $query = http_build_query($data, '', '&', PHP_QUERY_RFC3986);
         return $this->projectUrl . $url . ($query !== '' ? '?' . $query : '');
     }

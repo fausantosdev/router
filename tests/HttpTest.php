@@ -188,6 +188,30 @@ final class HttpTest extends TestCase
         self::assertSame(415, $this->request('PUT', '/users/42', 'hello', 'text/plain')[0]);
     }
 
+    public function testOptionalParametersOverRealHttp(): void
+    {
+        foreach (
+            [
+            '/optional' => ['id' => null, 'tab' => null],
+            '/optional/10' => ['id' => '10', 'tab' => null],
+            '/optional/10/posts' => ['id' => '10', 'tab' => 'posts'],
+            ] as $path => $expected
+        ) {
+            [$status, , $body] = $this->request('GET', $path);
+            self::assertSame(200, $status);
+            $response = json_decode($body, true, flags: JSON_THROW_ON_ERROR);
+            self::assertSame($expected, $response['data']);
+            self::assertSame($expected, $response['routerData']);
+            self::assertSame($expected, $response['currentData']);
+        }
+        self::assertSame(405, $this->request('POST', '/optional')[0]);
+        self::assertSame(404, $this->request('GET', '/optional/10/posts/extra')[0]);
+        self::assertSame(200, $this->request('HEAD', '/optional')[0]);
+        [$status, $headers] = $this->request('OPTIONS', '/optional');
+        self::assertSame(204, $status);
+        self::assertSame('GET, HEAD, OPTIONS', $headers['allow']);
+    }
+
     public function testRedirectStatusAndLocation(): void
     {
         [$status, $headers] = $this->request('GET', '/redirect');

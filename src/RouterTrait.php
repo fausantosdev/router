@@ -19,7 +19,8 @@ trait RouterTrait
         }
         $route = rtrim($route, '/') ?: '/';
         $path = $this->group !== null ? '/' . $this->group . ($route === '/' ? '' : $route) : $route;
-        if (preg_match('/[\x00-\x20\x7F?#]/', $path)) {
+        $literalPath = preg_replace('/\{[a-zA-Z_][a-zA-Z0-9_-]*\?\}/', '', $path);
+        if (preg_match('/[\x00-\x20\x7F?#]/', $literalPath ?? $path)) {
             throw new ConfigurationException('Route paths cannot contain whitespace, controls, query or fragment.');
         }
         if ($name !== null && (trim($name) === '' || isset($this->namedRoutes[$name]))) {

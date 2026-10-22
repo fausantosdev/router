@@ -15,7 +15,7 @@ Esta é uma proposta de nova major, não um patch compatível em todos os compor
 9. `_method` altera somente POST de formulário para PUT/PATCH/DELETE, em maiúsculas. Em JSON é dado comum; em outros verbos não altera o método.
 10. Classes/actions/middlewares inválidos lançam `ConfigurationException`, não 400/405/501. A aplicação deve registrar a falha e emitir uma resposta 500 sem expor detalhes ao cliente. Exceções da aplicação continuam propagando.
 11. `current()` antes de selecionar uma rota retorna `null`; os metadados refletem a rota selecionada, não o último grupo cadastrado.
-12. URLs nomeadas exigem todos os parâmetros escalares não vazios. Valores são codificados por segmento e query RFC3986. Não pré-codifique valores; `.`/`..` não são aceitos como parâmetro inteiro.
+12. URLs nomeadas exigem todos os parâmetros **obrigatórios**, escalares não vazios. Parâmetros `{name?}` ausentes ou `null` omitem seu segmento; opcionais posteriores não podem ser fornecidos sem os anteriores. Valores fornecidos são codificados por segmento e query RFC3986. Não pré-codifique valores; `.`/`..` não são aceitos como parâmetro inteiro.
 13. Declare propriedades nos controllers (incluindo `$router`); actions devem ser públicas, de instância e não mágicas. Callables continuam aceitos.
 14. Revise HEAD/OPTIONS. HEAD explícito ou fallback GET descarta output. OPTIONS automático emite 204/Allow sem executar middleware, para caminhos conhecidos; não é autorização nem implementação de CORS.
 15. Revise o front controller: aplique `error()` como status, emita `Allow` para 405 e não transforme negação de middleware (`false` sem erro) em 404.
@@ -46,5 +46,9 @@ O middleware que nega acesso deve definir o status/corpo apropriado. A bibliotec
 Capturas não são decodificadas internamente; preserve/valide o contrato de encoding do seu servidor. A URL base deve ser configurada e usar HTTP(S), sem credenciais, query ou fragmento. Não a derive de Host não confiável em produção.
 
 ## Antes de aprovar
+
+### Atualização incremental: opcionais
+
+É possível trocar `/users/{id}` por `/users/{id?}` para aceitar também `/users`. O callback recebe `['id' => null]` quando ausente. Não é necessário alterar rotas obrigatórias existentes. Opcionais são segmentos completos consecutivos no fim da rota; configurações ambíguas ou no meio são rejeitadas. Rotas estáticas continuam tendo prioridade e dinâmicas mantêm a ordem de cadastro. Um parâmetro opcional ausente também prevalece como `null` sobre um campo homônimo no body.
 
 Execute `composer install && composer check`, rode um projeto real em staging e revise o diff do bundle. Apache, Nginx/FPM, workers persistentes e uploads reais precisam de validação no seu ambiente. Não foi criado release, tag ou entrada Packagist.
